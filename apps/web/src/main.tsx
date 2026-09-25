@@ -17,7 +17,8 @@ import { clearChunkReloadGuard, reloadOnceForChunkLoadError } from "./lib/chunkR
 // Electron loads the app from a file-backed shell, so hash history avoids path resolution issues.
 const history = isElectron ? createHashHistory() : createBrowserHistory();
 
-const router = getRouter(history);
+// Hash history keeps routes in the fragment, so only browser history needs the base path.
+const router = getRouter(history, isElectron ? undefined : import.meta.env.BASE_URL);
 
 if (isElectron) {
   syncDocumentElectronPlatformClasses(navigator.platform);

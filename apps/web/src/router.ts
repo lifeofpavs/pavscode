@@ -2,7 +2,7 @@ import { createRouter, RouterHistory } from "@tanstack/react-router";
 
 import { routeTree } from "./routeTree.gen";
 
-export function getRouter(history: RouterHistory) {
+export function getRouter(history: RouterHistory, basepath?: string) {
   return createRouter({
     routeTree,
     history,
@@ -11,6 +11,7 @@ export function getRouter(history: RouterHistory) {
     // fetching them on hover/focus intent hides the load from the first
     // settings or pull-request navigation.
     defaultPreload: "intent",
+    ...(basepath ? { basepath } : {}),
   });
 }
 

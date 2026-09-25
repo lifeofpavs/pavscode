@@ -168,3 +168,31 @@ Full glossary with file links: `docs/internals/glossary.md`
 
 - Don't verify with browsers or computer use unless the user explicitly agrees or requests it.
 - Security is important, but should not be over-indexed on, especially for dev mode/maintainer-only features.
+
+## pavscode fork (lifeofpavs/pavscode)
+
+Fork of `pingdotgg/t3code` (remote `upstream`). Keep fork changes small so upstream merges stay easy.
+
+**Fork change:** the web client supports a URL sub-path set by Vite's `base` (`import.meta.env.BASE_URL`). Endpoint helpers join onto the base URL's path instead of replacing it. Default builds (`/`) behave like upstream.
+
+**Deployment on host `anibal`:**
+
+- URL: `https://anibal.siamese-mark.ts.net/pavscode/`. Caddy (`/etc/caddy/Caddyfile`) strips `/pavscode` and proxies to `127.0.0.1:3012`, so the server only ever sees root paths.
+- Service: `systemctl --user {status,restart} pavscode.service` (`~/.config/systemd/user/pavscode.service`). Log: `~/.t3-pavscode/service.log`. State: `--base-dir ~/.t3-pavscode`.
+- Do not touch the separately installed T3 Code on `127.0.0.1:3773` (`t3code.service`, `~/.t3`); agent sessions may be running inside it.
+- Redeploy after changes:
+  ```bash
+  export PATH=$HOME/.nvm/versions/node/v24.21.0/bin:$PATH NODE_OPTIONS=--max-old-space-size=2560
+  pnpm install --network-concurrency=6 --child-concurrency=1
+  (cd apps/server && pnpm run build:bundle)
+  (cd apps/web && pnpm exec vp build --base /pavscode/)
+  systemctl --user restart pavscode.service
+  ```
+- Pair a browser: `node apps/server/dist/bin.mjs pair --base-dir ~/.t3-pavscode --ttl 1h`, then open `https://anibal.siamese-mark.ts.net/pavscode/pair#token=<TOKEN>`. List or revoke sessions with `... auth session list|revoke --base-dir ~/.t3-pavscode`.
+
+**Host limits:** 7.6 GB RAM, no swap, a 75 GB disk shared with Docker apps and Postgres.
+
+- Never run repo-wide `typecheck`, `test` or `vp check` here.
+- Run installs and builds with the flags above; default concurrency gets OOM-killed.
+- Check `df -h /` before installing; a full `node_modules` needs about 4 GB.
+- `~/.local/share/pnpm` shadows the right pnpm. Always put the nvm Node 24 `bin` first on `PATH`.

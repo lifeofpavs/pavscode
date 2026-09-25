@@ -225,8 +225,10 @@ function resolveConfiguredPrimaryTarget(): PrimaryEnvironmentTarget | null {
 }
 
 function resolveWindowOriginPrimaryTarget(): PrimaryEnvironmentTarget {
+  const basePath = import.meta.env.BASE_URL;
   const url = parseTargetUrl({
-    rawValue: window.location.origin,
+    rawValue: basePath,
+    baseUrl: window.location.origin,
     source: "window-origin",
     urlKind: "http-base-url",
   });
@@ -240,6 +242,10 @@ function resolveWindowOriginPrimaryTarget(): PrimaryEnvironmentTarget {
       source: "window-origin",
       protocol: url.protocol,
     });
+  }
+  // The ws sites only append "/ws" onto a root path, so spell it out under a base path.
+  if (basePath !== "/") {
+    url.pathname = `${basePath}ws`;
   }
   return {
     source: "window-origin",
@@ -296,7 +302,8 @@ export function resolvePrimaryEnvironmentHttpUrl(
     source: primaryTarget.source,
     urlKind: "http-base-url",
   });
-  url.pathname = pathname;
+  // Join onto the base path (sub-path behind a reverse proxy) instead of replacing it.
+  url.pathname = url.pathname.replace(/\/$/, "") + pathname;
   if (searchParams) {
     url.search = new URLSearchParams(searchParams).toString();
   }

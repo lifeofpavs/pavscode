@@ -88,7 +88,7 @@ export const remoteHttpClientLayer = (
 
 const remoteApiBaseUrl = (httpBaseUrl: string): string => {
   const url = new URL(httpBaseUrl);
-  url.pathname = "/";
+  // Keep the base path; HttpApiClient joins it onto endpoint paths with one slash.
   url.search = "";
   url.hash = "";
   return url.toString();

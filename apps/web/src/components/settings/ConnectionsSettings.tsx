@@ -548,7 +548,7 @@ function resolveAdvertisedEndpointPairingUrl(
 }
 
 function resolveCurrentOriginPairingUrl(credential: string): string {
-  const url = new URL("/pair", window.location.href);
+  const url = new URL(`${import.meta.env.BASE_URL.replace(/\/$/, "")}/pair`, window.location.href);
   return setPairingTokenOnUrl(url, credential).toString();
 }
 

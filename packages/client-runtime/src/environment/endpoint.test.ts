@@ -4,6 +4,7 @@ import {
   classifyHostedHttpsCompatibility,
   createAdvertisedEndpoint,
   deriveWsBaseUrl,
+  environmentEndpointUrl,
   normalizeHttpBaseUrl,
 } from "./endpoint.ts";
 
@@ -57,5 +58,14 @@ describe("advertised endpoint helpers", () => {
       status: "available",
       isDefault: true,
     });
+  });
+
+  it("joins an endpoint path onto a base URL's path instead of replacing it", () => {
+    expect(environmentEndpointUrl("https://example.com/pavscode/", "/api/auth/session")).toBe(
+      "https://example.com/pavscode/api/auth/session",
+    );
+    expect(environmentEndpointUrl("https://example.com/", "/api/auth/session")).toBe(
+      "https://example.com/api/auth/session",
+    );
   });
 });
